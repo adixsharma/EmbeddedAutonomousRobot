@@ -1,4 +1,4 @@
-# Autonomous Robtot – Embedded Line-Following Robot with Obstacle Avoidance
+# Autonomous Car – Embedded Line-Following Robot with Obstacle Avoidance
 
 **Authors:**  Aditya Sharma, Zachary Howe, Yu-Ming Chen, and James Nguyen
 
