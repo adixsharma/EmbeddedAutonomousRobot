@@ -1,29 +1,84 @@
-## CSC615 Group Term Project
+# Autonomous Robtot – Embedded Line-Following Robot with Obstacle Avoidance
 
-### Drive On
+**Authors:**  Aditya Sharma, Zachary Howe, Yu-Ming Chen, and James Nguyen
 
-Have all your code in the respository along with videos (or links to videos)
+**Platform:** Raspberry Pi 4 · Embedded C  
+**Project Type:** Group Term Project
 
-Team Report - PDF (also submitted to Canvas)
+---
 
-Should have title page and each page should have your team name, date, and class in the header and page number in the footer.
+## 📦 Project Overview
 
-- List each team member, and Github Username of primary github with your full source and Makefile 
-- Task Description
-- Building the Robot (include photos)
-- Parts / Sensors Used (include photo, and part numbers where applicable, such as HC-SR04 for the sonic echo sensor)
-- How was bot built (photos good to include)
-- What libraries/software did you use in your code (include full reference)
-- Flowchart of your code
-- Pin Assignments you used
-- Hardware Diagram
-- What worked well
-- What were issues 
+**EmbeddedAutonomousRobot** is an autonomous robot programmed in low-level C to follow a line using PID control and intelligently avoid obstacles using 2 ultrasonic sensors. Built on the Raspberry Pi 4, the robot uses a multithreaded design to handle real-time sensor input and motor control with minimal latency.
 
-Optional Appendix:
+---
 
-- Listing of all your code
-- Makefile
+## 🔧 Hardware Components
 
-In addition to this will be the final running of your bot which will be recorded and an Individual submission about your team and experience.
+- Raspberry Pi 4
+- (5) IR reflectance sensors (line detection)
+- (2) ultrasonic sensors (HC-SR04 for front and side detection)
+- Waveshare Motor Driver HAT (PCA9685 for PWM motor control)
+- (2) 12v Motors 130 rpm
+- Drive chassis
+
+---
+
+## ⚙️ Software Architecture
+
+The codebase is implemented in low-level C with three concurrent threads:
+
+### 🧵 Thread Overview
+
+1. **Main Control Thread**
+   - Polls IR sensors
+   - Computes PID error
+   - Sets motor speeds via PWM for steering
+
+2. **Front Sonar Thread**
+   - Measures distance using HC-SR04
+   - Triggers avoidance logic if an obstacle is < 30 cm
+
+3. **Side Sonar Thread**
+   - Activated during avoidance
+   - Follows wall/object edge until the line is reacquired
+
+All threads share data using `volatile` globals and coordinate access through `pthread_mutex_t` locks to prevent race conditions.
+
+
+---
+
+## 🧠 PID Line-Following Logic
+
+The robot computes a steering correction based on the relative position of the line under its IR sensors. A weighted average of sensor readings is used to derive a deviation error, which is then passed through a PID controller:
+
+```c
+error = weighted_sum(sensor_values) - center_reference;
+correction = Kp * error + Ki * integral + Kd * derivative;
+```
+
+---
+
+## 🚧 Obstacle Avoidance Logic
+
+- If front sonar detects an obstacle within 30 cm:
+  1. The robot halts
+  2. Pivots left to disengage from the line until the side sonar sensor detects the object
+  3. Utilize side sonar to follow the object’s edge
+  4. Once the line is detected again, returns to PID Line following mode
+
+This makes the robot capable of navigating dynamic environments with blockages.
+
+---
+
+## 🧰 Skills Demonstrated
+
+- Embedded C with POSIX threads
+- Real-time control with sensor fusion
+- PID tuning and feedback systems
+- Custom GPIO and I2C driver integration
+- Team-based software development and hardware assembly
+
+---
+
 
